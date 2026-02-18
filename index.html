@@ -121,10 +121,49 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot-red { background: #ff5f56; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; border: none; padding: 0; }
+        .dot-red { background: #ff5f56; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .dot-red:hover { transform: scale(1.3); box-shadow: 0 0 8px rgba(255, 95, 86, 0.6); }
         .dot-yellow { background: #ffbd2e; }
         .dot-green { background: #27c93f; }
+
+        .closed-message {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid rgba(233, 69, 96, 0.15);
+            margin-top: 1.5rem;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .closed-message .beer {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: beerWobble 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes beerWobble {
+            from { transform: rotate(-5deg); }
+            to { transform: rotate(5deg); }
+        }
+
+        .closed-message h2 {
+            font-family: 'Fira Code', monospace;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ffa502, #ffbd2e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .closed-message p {
+            color: var(--muted);
+            font-size: 1rem;
+        }
 
         .card-header .filename {
             margin-left: auto;
@@ -259,7 +298,7 @@
 <main>
     <div class="code-card fade-in" id="codeCard">
         <div class="card-header">
-            <div class="dot dot-red"></div>
+            <button class="dot dot-red" onclick="sluitWindow()" title="Sluiten"></button>
             <div class="dot dot-yellow"></div>
             <div class="dot dot-green"></div>
             <span class="filename" id="filename">laden...</span>
@@ -270,7 +309,13 @@
         <div class="explanation" id="explanation"></div>
     </div>
 
-    <div class="btn-row">
+    <div class="closed-message" id="closedMessage">
+        <span class="beer">&#x1F37A;</span>
+        <h2>Tijd voor bier!</h2>
+        <p>De code is gesloten. Je hebt genoeg gedaan voor vandaag.</p>
+    </div>
+
+    <div class="btn-row" id="btnRow">
         <button class="btn btn-primary" onclick="nieuwSnippet()">&#x1F504; Volgende code</button>
         <button class="btn btn-secondary" onclick="kopieerCode()">&#x1F4CB; Kopieer</button>
     </div>
@@ -693,6 +738,24 @@ function nieuwSnippet() {
     gezien++;
     document.getElementById('counter').textContent =
         `${gezien} snippet${gezien === 1 ? '' : 's'} bekeken — ${snippets.length - (huidigeIndex + 1)} te gaan in deze ronde`;
+}
+
+function sluitWindow() {
+    const card = document.getElementById('codeCard');
+    const msg = document.getElementById('closedMessage');
+    const btnRow = document.getElementById('btnRow');
+    const counter = document.getElementById('counter');
+
+    card.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+    card.style.transform = 'scale(0.95)';
+    card.style.opacity = '0';
+
+    setTimeout(() => {
+        card.style.display = 'none';
+        btnRow.style.display = 'none';
+        counter.style.display = 'none';
+        msg.style.display = 'block';
+    }, 400);
 }
 
 function kopieerCode() {
