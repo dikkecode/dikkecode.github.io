@@ -4,9 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dikkecode — Elke keer weer anders</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Inter:wght@400;600;800&display=swap');
+    <meta name="description" content="Elke refresh een nieuw stukje code. Sommige nuttig. De meeste niet. Herkenbare programmeerhumor in het Nederlands.">
+    <meta name="theme-color" content="#0f0f1a">
 
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="dikkecode — Elke keer weer anders">
+    <meta property="og:description" content="Elke refresh een nieuw stukje code. Sommige nuttig. De meeste niet.">
+    <meta property="og:url" content="https://dikkecode.github.io">
+    <meta property="og:image" content="https://dikkecode.github.io/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Fonts (preconnect for performance) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Inter:wght@400;600;800&display=swap">
+
+    <!-- Prism.js syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
@@ -16,7 +33,7 @@
             --accent2: #0f3460;
             --text: #eaeaea;
             --muted: #888;
-            --code-bg: #16213e;
+            --code-bg: #1d1f21;
         }
 
         body {
@@ -127,6 +144,47 @@
         .dot-yellow { background: #ffbd2e; }
         .dot-green { background: #27c93f; }
 
+        .card-header .filename {
+            margin-left: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .code-body {
+            padding: 1.5rem;
+            background: var(--code-bg);
+        }
+
+        .code-body pre {
+            margin: 0;
+            border-radius: 0;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        .code-body pre code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            white-space: pre;
+            tab-size: 2;
+            background: transparent !important;
+        }
+
+        .explanation {
+            padding: 1.2rem 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .explanation strong {
+            color: var(--accent);
+        }
+
+        /* Closed message */
         .closed-message {
             display: none;
             text-align: center;
@@ -165,49 +223,23 @@
             font-size: 1rem;
         }
 
-        .card-header .filename {
-            margin-left: auto;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .code-body {
-            padding: 1.5rem;
-            background: var(--code-bg);
-        }
-
-        pre {
+        .closed-message .reopen-link {
+            display: inline-block;
+            margin-top: 1.2rem;
+            color: var(--accent);
             font-family: 'Fira Code', monospace;
             font-size: 0.85rem;
-            line-height: 1.7;
-            overflow-x: auto;
-            white-space: pre;
-            tab-size: 2;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: opacity 0.2s;
         }
 
-        .comment { color: #6a9955; }
-        .keyword { color: #c586c0; }
-        .string { color: #ce9178; }
-        .function { color: #dcdcaa; }
-        .number { color: #b5cea8; }
-        .type { color: #4ec9b0; }
-        .variable { color: #9cdcfe; }
-        .operator { color: #d4d4d4; }
-        .bracket { color: #ffd700; }
-
-        .explanation {
-            padding: 1.2rem 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #ccc;
+        .closed-message .reopen-link:hover {
+            opacity: 0.7;
         }
 
-        .explanation strong {
-            color: var(--accent);
-        }
-
+        /* Buttons */
         .btn-row {
             display: flex;
             justify-content: center;
@@ -256,6 +288,30 @@
             font-family: 'Fira Code', monospace;
         }
 
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--accent2);
+            color: var(--text);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 50px;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         footer {
             text-align: center;
             padding: 2rem 1rem;
@@ -281,38 +337,39 @@
 
         @media (max-width: 600px) {
             .logo { font-size: 2rem; }
-            pre { font-size: 0.75rem; }
+            .code-body pre code { font-size: 0.75rem; }
             .btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="emoji-rain" id="emojiRain"></div>
+<div class="emoji-rain" id="emojiRain" aria-hidden="true"></div>
 
 <header>
-    <div class="logo">dikkecode</div>
+    <h1 class="logo">dikkecode</h1>
     <p class="subtitle">Elke refresh een nieuw stukje code. Sommige nuttig. De meeste niet.</p>
 </header>
 
 <main>
     <div class="code-card fade-in" id="codeCard">
         <div class="card-header">
-            <button class="dot dot-red" onclick="sluitWindow()" title="Sluiten"></button>
-            <div class="dot dot-yellow"></div>
-            <div class="dot dot-green"></div>
+            <button class="dot dot-red" onclick="sluitWindow()" aria-label="Sluit codeblok" title="Sluiten"></button>
+            <div class="dot dot-yellow" aria-hidden="true"></div>
+            <div class="dot dot-green" aria-hidden="true"></div>
             <span class="filename" id="filename">laden...</span>
         </div>
         <div class="code-body">
-            <pre id="codeBlock">Laden...</pre>
+            <pre id="codeBlock"><code id="codeContent">Laden...</code></pre>
         </div>
         <div class="explanation" id="explanation"></div>
     </div>
 
     <div class="closed-message" id="closedMessage">
-        <span class="beer">&#x1F37A;</span>
+        <span class="beer" aria-hidden="true">&#x1F37A;</span>
         <h2>Tijd voor bier!</h2>
         <p>De code is gesloten. Je hebt genoeg gedaan voor vandaag.</p>
+        <span class="reopen-link" onclick="heropenen()" role="button" tabindex="0">&#x1F4BB; toch nog even coden...</span>
     </div>
 
     <div class="btn-row" id="btnRow">
@@ -323,392 +380,39 @@
     <div class="counter" id="counter"></div>
 </main>
 
+<div class="toast" id="toast"></div>
+
 <footer>
     Gebouwd met &#x2764;&#xFE0F; en twijfelachtige programmeervaardigheden &mdash;
-    <a href="https://github.com/dikkecode" target="_blank">GitHub</a>
+    <a href="https://github.com/dikkecode" target="_blank" rel="noopener">GitHub</a>
 </footer>
 
+<!-- Prism.js core + languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+
+<!-- Snippets data -->
+<script src="snippets.js"></script>
+
 <script>
-const snippets = [
-    {
-        filename: "koffie.py",
-        code: `<span class="comment"># Stap 1: koffie zetten</span>
-<span class="comment"># Stap 2: code schrijven</span>
-<span class="comment"># Stap 3: beseffen dat de koffie koud is</span>
-
-<span class="keyword">import</span> <span class="variable">time</span>
-
-<span class="keyword">class</span> <span class="type">Programmeur</span>:
-    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="variable">self</span>):
-        <span class="variable">self</span>.koffie = <span class="number">100</span>
-        <span class="variable">self</span>.motivatie = <span class="variable">self</span>.koffie
-
-    <span class="keyword">def</span> <span class="function">werk</span>(<span class="variable">self</span>):
-        <span class="keyword">while</span> <span class="variable">self</span>.koffie > <span class="number">0</span>:
-            <span class="variable">self</span>.koffie -= <span class="number">1</span>
-            <span class="variable">self</span>.motivatie = <span class="variable">self</span>.koffie
-        <span class="keyword">return</span> <span class="string">"Ik ga naar huis"</span>`,
-        uitleg: `<strong>Herkenbaar?</strong> De motivatie van een programmeur is direct gekoppeld aan het koffieniveau. Zodra de koffie op is, is het tijd om naar huis te gaan.`
-    },
-    {
-        filename: "todo.js",
-        code: `<span class="comment">// TODO: dit later fixen</span>
-<span class="comment">// TODO: dit ook later fixen</span>
-<span class="comment">// TODO: uitzoeken waarom alles kapot is</span>
-
-<span class="keyword">const</span> <span class="variable">todo</span> = [
-  <span class="string">"bugs fixen"</span>,
-  <span class="string">"tests schrijven"</span>,
-  <span class="string">"documentatie bijwerken"</span>,
-  <span class="string">"Netflix kijken"</span>,
-];
-
-<span class="keyword">const</span> <span class="variable">watIkEchtDoe</span> = <span class="variable">todo</span>.<span class="function">filter</span>(
-  (<span class="variable">t</span>) <span class="operator">=></span> <span class="variable">t</span>.<span class="function">includes</span>(<span class="string">"Netflix"</span>)
-);
-
-<span class="variable">console</span>.<span class="function">log</span>(<span class="variable">watIkEchtDoe</span>);
-<span class="comment">// ["Netflix kijken"]</span>`,
-        uitleg: `<strong>Eerlijkheid duurt het langst.</strong> Je kunt een hele todo-lijst maken, maar we weten allemaal wat er echt gaat gebeuren vanavond.`
-    },
-    {
-        filename: "vergadering.sql",
-        code: `<span class="comment">-- Zoek alle vergaderingen die ook</span>
-<span class="comment">-- een e-mail hadden kunnen zijn</span>
-
-<span class="keyword">SELECT</span> <span class="variable">*</span>
-<span class="keyword">FROM</span> <span class="type">vergaderingen</span>
-<span class="keyword">WHERE</span> <span class="variable">duur</span> <span class="operator">></span> <span class="string">'30 minuten'</span>
-  <span class="keyword">AND</span> <span class="variable">nuttige_besluiten</span> <span class="operator">=</span> <span class="number">0</span>
-  <span class="keyword">AND</span> <span class="variable">iemand_zei</span> <span class="operator">=</span> <span class="string">'Kunnen we dit offline bespreken?'</span>
-<span class="keyword">ORDER BY</span> <span class="variable">frustratie</span> <span class="keyword">DESC</span>;
-
-<span class="comment">-- Resultaat: 847 rijen gevonden</span>
-<span class="comment">-- Elapsed time: heel je carrière</span>`,
-        uitleg: `<strong>847 rijen!</strong> Als je vergaderingen kunt querien, dan weet je dat de meeste gewoon een Slack-berichtje hadden kunnen zijn.`
-    },
-    {
-        filename: "stages_of_debugging.ts",
-        code: `<span class="keyword">type</span> <span class="type">Fase</span> =
-  | <span class="string">"Ontkenning"</span>
-  | <span class="string">"Woede"</span>
-  | <span class="string">"Onderhandelen"</span>
-  | <span class="string">"StackOverflow"</span>
-  | <span class="string">"Acceptatie"</span>;
-
-<span class="keyword">function</span> <span class="function">debug</span>(<span class="variable">bug</span>: <span class="type">string</span>): <span class="type">Fase</span> <span class="bracket">{</span>
-  <span class="variable">console</span>.<span class="function">log</span>(<span class="string">"Dit kan niet kloppen..."</span>);
-  <span class="variable">console</span>.<span class="function">log</span>(<span class="string">"WAAROM WERKT DIT NIET?!"</span>);
-  <span class="variable">console</span>.<span class="function">log</span>(<span class="string">"Als ik dit fix, ga ik om 5 uur weg"</span>);
-  <span class="variable">console</span>.<span class="function">log</span>(<span class="string">"Oh wacht, StackOverflow..."</span>);
-  <span class="keyword">return</span> <span class="string">"Acceptatie"</span>;
-  <span class="comment">// Het was een puntkomma.</span>
-<span class="bracket">}</span>`,
-        uitleg: `<strong>De 5 fases van debuggen.</strong> Na uren zoeken is het altijd iets stoms. Een puntkomma. Een typo. Een ontbrekende haakje. Altijd.`
-    },
-    {
-        filename: "git_excuses.sh",
-        code: `<span class="comment">#!/bin/bash</span>
-<span class="comment"># Genereer een excuus voor je git commit</span>
-
-<span class="variable">excuses</span>=<span class="bracket">(</span>
-  <span class="string">"Werkte op mijn machine"</span>
-  <span class="string">"Oeps"</span>
-  <span class="string">"Fix van de fix van de fix"</span>
-  <span class="string">"Vrijdagmiddagcommit, YOLO"</span>
-  <span class="string">"Niet mijn schuld"</span>
-  <span class="string">"Ik snap niet waarom dit werkt"</span>
-  <span class="string">"Hier was ik niet trots op"</span>
-  <span class="string">"Aub niet reviewen"</span>
-<span class="bracket">)</span>
-
-<span class="variable">random</span>=<span class="operator">$((</span> RANDOM % <span class="operator">\${#</span><span class="variable">excuses</span>[@]<span class="operator">}</span> <span class="operator">))</span>
-
-git commit -m <span class="string">"<span class="operator">\${</span><span class="variable">excuses</span>[<span class="variable">$random</span>]<span class="operator">}</span>"</span>
-
-<span class="variable">echo</span> <span class="string">"Commit bericht: \${excuses[$random]}"</span>
-<span class="variable">echo</span> <span class="string">"Geen zorgen, niemand leest commit messages toch"</span>`,
-        uitleg: `<strong>Eerlijke git commits.</strong> Vergeet "feat:" en "fix:" — dit zijn de commit-berichten die we echt willen schrijven.`
-    },
-    {
-        filename: "schoonmaak.css",
-        code: `<span class="comment">/* Stap 1: Netjes beginnen */</span>
-<span class="type">.container</span> <span class="bracket">{</span>
-  <span class="variable">display</span>: <span class="string">flex</span>;
-  <span class="variable">justify-content</span>: <span class="string">center</span>;
-<span class="bracket">}</span>
-
-<span class="comment">/* Stap 2: Hmm, waarom werkt dit niet */</span>
-<span class="type">.container</span> <span class="bracket">{</span>
-  <span class="variable">display</span>: <span class="string">flex</span>;
-  <span class="variable">justify-content</span>: <span class="string">center</span>;
-  <span class="variable">align-items</span>: <span class="string">center</span>;
-  <span class="variable">margin</span>: <span class="number">0</span> <span class="string">auto</span>;
-  <span class="variable">padding</span>: <span class="number">0</span>;
-<span class="bracket">}</span>
-
-<span class="comment">/* Stap 3: PANIEK */</span>
-<span class="type">.container</span> <span class="bracket">{</span>
-  <span class="variable">display</span>: <span class="string">flex</span> <span class="keyword">!important</span>;
-  <span class="variable">justify-content</span>: <span class="string">center</span> <span class="keyword">!important</span>;
-  <span class="variable">align-items</span>: <span class="string">center</span> <span class="keyword">!important</span>;
-  <span class="variable">position</span>: <span class="string">absolute</span> <span class="keyword">!important</span>;
-  <span class="variable">top</span>: <span class="number">50%</span> <span class="keyword">!important</span>;
-  <span class="variable">left</span>: <span class="number">50%</span> <span class="keyword">!important</span>;
-  <span class="variable">transform</span>: <span class="function">translate</span>(<span class="number">-50%</span>, <span class="number">-50%</span>) <span class="keyword">!important</span>;
-<span class="bracket">}</span>
-
-<span class="comment">/* Het werkt. Niet aanraken. */</span>`,
-        uitleg: `<strong>De 3 fases van CSS.</strong> Van netjes naar !important-chaos. En als het eenmaal werkt: niemand raakt het meer aan.`
-    },
-    {
-        filename: "interview.java",
-        code: `<span class="comment">/**
- * Sollicitatiegesprek vs. Echt werk
- * @author Elke programmeur ooit
- */</span>
-<span class="keyword">public class</span> <span class="type">Sollicitatie</span> <span class="bracket">{</span>
-
-    <span class="comment">// Wat ze vragen:</span>
-    <span class="keyword">public</span> <span class="type">BinaryTree</span> <span class="function">invertTree</span>(<span class="type">BinaryTree</span> <span class="variable">root</span>) <span class="bracket">{</span>
-        <span class="comment">// Inverteer een binaire boom in O(n)</span>
-        <span class="comment">// terwijl 3 mensen je aanstaren</span>
-        <span class="keyword">return</span> <span class="variable">magicComplexAlgorithm</span>(<span class="variable">root</span>);
-    <span class="bracket">}</span>
-
-    <span class="comment">// Wat je echt doet op werk:</span>
-    <span class="keyword">public</span> <span class="type">String</span> <span class="function">echtWerk</span>() <span class="bracket">{</span>
-        <span class="keyword">return</span> <span class="string">"Jira-tickets verplaatsen"</span>;
-    <span class="bracket">}</span>
-<span class="bracket">}</span>`,
-        uitleg: `<strong>Herkenbaar?</strong> In het sollicitatiegesprek moet je een binaire boom inverteren. Op werk verplaats je Jira-tickets van "To Do" naar "In Progress" naar "To Do".`
-    },
-    {
-        filename: "hond.py",
-        code: `<span class="keyword">class</span> <span class="type">Hond</span>:
-    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="variable">self</span>, <span class="variable">naam</span>):
-        <span class="variable">self</span>.naam = <span class="variable">naam</span>
-        <span class="variable">self</span>.is_brave_jongen = <span class="keyword">True</span>  <span class="comment"># altijd</span>
-
-    <span class="keyword">def</span> <span class="function">blaf</span>(<span class="variable">self</span>):
-        <span class="keyword">return</span> <span class="string">"WOEF! "</span> * <span class="number">3</span>
-
-    <span class="keyword">def</span> <span class="function">haal_op</span>(<span class="variable">self</span>, <span class="variable">ding</span>):
-        <span class="keyword">if</span> <span class="variable">ding</span> == <span class="string">"bal"</span>:
-            <span class="keyword">return</span> <span class="string">f"<span class="bracket">{</span><span class="variable">self</span>.naam<span class="bracket">}</span> brengt de bal terug!"</span>
-        <span class="keyword">return</span> <span class="string">f"<span class="bracket">{</span><span class="variable">self</span>.naam<span class="bracket">}</span> kijkt je aan en gaat liggen"</span>
-
-<span class="variable">max</span> = <span class="type">Hond</span>(<span class="string">"Max"</span>)
-<span class="function">print</span>(<span class="variable">max</span>.<span class="function">blaf</span>())
-<span class="function">print</span>(<span class="variable">max</span>.<span class="function">haal_op</span>(<span class="string">"bal"</span>))
-<span class="function">print</span>(<span class="variable">max</span>.<span class="function">haal_op</span>(<span class="string">"afstandsbediening"</span>))
-<span class="function">print</span>(<span class="string">f"Brave jongen? <span class="bracket">{</span><span class="variable">max</span>.is_brave_jongen<span class="bracket">}</span>"</span>)`,
-        uitleg: `<strong>max.is_brave_jongen = True</strong> — Dit is de enige boolean in je code die nooit verandert. Max haalt alleen ballen op, de rest negeert hij vrolijk.`
-    },
-    {
-        filename: "wachtwoord.rb",
-        code: `<span class="comment"># Wachtwoordbeleid anno 2026</span>
-
-<span class="keyword">def</span> <span class="function">valideer_wachtwoord</span>(<span class="variable">ww</span>)
-  <span class="variable">eisen</span> = [
-    <span class="variable">ww</span>.length >= <span class="number">12</span>,
-    <span class="variable">ww</span>.match?(<span class="string">/[A-Z]/</span>),
-    <span class="variable">ww</span>.match?(<span class="string">/[a-z]/</span>),
-    <span class="variable">ww</span>.match?(<span class="string">/[0-9]/</span>),
-    <span class="variable">ww</span>.match?(<span class="string">/[!@#$%^&*]/</span>),
-    <span class="variable">ww</span>.include?(<span class="string">"een emoji"</span>),
-    <span class="variable">ww</span>.include?(<span class="string">"naam van je eerste huisdier"</span>),
-    <span class="variable">ww</span>.include?(<span class="string">"je favoriete kleur"</span>),
-    <span class="variable">ww</span>.include?(<span class="string">"het antwoord op het leven"</span>),
-  ]
-
-  <span class="keyword">if</span> <span class="variable">eisen</span>.all?
-    <span class="string">"Wachtwoord geaccepteerd! (dit vergeet je morgen)"</span>
-  <span class="keyword">else</span>
-    <span class="string">"Niet sterk genoeg. Probeer je hele levensgeschiedenis."</span>
-  <span class="keyword">end</span>
-<span class="keyword">end</span>`,
-        uitleg: `<strong>Wachtwoordbeleid in 2026.</strong> Je hebt 12 tekens, hoofdletters, cijfers, speciale tekens, een emoji, en je hele levensgeschiedenis nodig. En dan vergeet je het alsnog.`
-    },
-    {
-        filename: "eten.go",
-        code: `<span class="keyword">package</span> main
-
-<span class="keyword">import</span> <span class="string">"fmt"</span>
-
-<span class="keyword">type</span> <span class="type">Collega</span> <span class="keyword">struct</span> <span class="bracket">{</span>
-    Naam    <span class="type">string</span>
-    Honger  <span class="type">int</span>
-<span class="bracket">}</span>
-
-<span class="keyword">func</span> <span class="function">watEtenWe</span>(<span class="variable">team</span> []<span class="type">Collega</span>) <span class="type">string</span> <span class="bracket">{</span>
-    <span class="keyword">for</span> <span class="variable">_</span>, <span class="variable">c</span> := <span class="keyword">range</span> <span class="variable">team</span> <span class="bracket">{</span>
-        <span class="variable">fmt</span>.<span class="function">Printf</span>(<span class="string">"%s: Maakt mij niet uit\n"</span>, <span class="variable">c</span>.Naam)
-    <span class="bracket">}</span>
-    <span class="comment">// 45 minuten later...</span>
-    <span class="keyword">return</span> <span class="string">"Febo"</span>
-<span class="bracket">}</span>
-
-<span class="keyword">func</span> <span class="function">main</span>() <span class="bracket">{</span>
-    <span class="variable">team</span> := []<span class="type">Collega</span><span class="bracket">{</span>
-        <span class="bracket">{</span><span class="string">"Pieter"</span>, <span class="number">8</span><span class="bracket">}</span>,
-        <span class="bracket">{</span><span class="string">"Lisa"</span>, <span class="number">9</span><span class="bracket">}</span>,
-        <span class="bracket">{</span><span class="string">"Ahmed"</span>, <span class="number">7</span><span class="bracket">}</span>,
-    <span class="bracket">}</span>
-    <span class="variable">fmt</span>.<span class="function">Println</span>(<span class="function">watEtenWe</span>(<span class="variable">team</span>))
-<span class="bracket">}</span>`,
-        uitleg: `<strong>Het dagelijkse lunch-dilemma.</strong> Iedereen zegt "maakt mij niet uit" en 45 minuten later sta je bij de Febo. Elke. Dag. Weer.`
-    },
-    {
-        filename: "prod_deploy.yaml",
-        code: `<span class="comment"># deployment-plan.yaml</span>
-<span class="comment"># "Het is maar een kleine aanpassing"</span>
-
-<span class="variable">stappen</span>:
-  - <span class="variable">naam</span>: <span class="string">"Code pushen naar productie"</span>
-    <span class="variable">wanneer</span>: <span class="string">"vrijdag 16:55"</span>
-    <span class="variable">reviewer</span>: <span class="string">"niemand"</span>
-    <span class="variable">tests</span>: <span class="string">"die doen we maandag"</span>
-
-  - <span class="variable">naam</span>: <span class="string">"Paniek"</span>
-    <span class="variable">wanneer</span>: <span class="string">"vrijdag 17:01"</span>
-    <span class="variable">actie</span>: <span class="string">"git revert HEAD"</span>
-
-  - <span class="variable">naam</span>: <span class="string">"Ontkenning"</span>
-    <span class="variable">wanneer</span>: <span class="string">"vrijdag 17:05"</span>
-    <span class="variable">actie</span>: <span class="string">"laptop dichtklappen"</span>
-
-  - <span class="variable">naam</span>: <span class="string">"Maandagochtend"</span>
-    <span class="variable">wanneer</span>: <span class="string">"maandag 09:00"</span>
-    <span class="variable">actie</span>: <span class="string">"'Het lag aan de server'"</span>`,
-        uitleg: `<strong>Vrijdagmiddag-deploy.</strong> De beroemde laatste woorden: "Het is maar een kleine aanpassing." Spoiler: dat is het nooit.`
-    },
-    {
-        filename: "ai_helper.py",
-        code: `<span class="comment"># Hoe programmeurs in 2026 code schrijven</span>
-
-<span class="keyword">def</span> <span class="function">schrijf_code</span>(<span class="variable">probleem</span>):
-    <span class="comment"># Stap 1: Vraag het aan AI</span>
-    <span class="variable">antwoord</span> = <span class="variable">ai</span>.<span class="function">vraag</span>(<span class="variable">probleem</span>)
-
-    <span class="comment"># Stap 2: Kopieer het antwoord</span>
-    <span class="variable">code</span> = <span class="variable">antwoord</span>.<span class="function">kopieer</span>()
-
-    <span class="comment"># Stap 3: Het werkt niet</span>
-    <span class="variable">ai</span>.<span class="function">vraag</span>(<span class="string">"Waarom werkt dit niet?"</span>)
-
-    <span class="comment"># Stap 4: Kopieer het nieuwe antwoord</span>
-    <span class="variable">code</span> = <span class="variable">antwoord</span>.<span class="function">kopieer</span>()
-
-    <span class="comment"># Stap 5: Herhaal tot het werkt</span>
-    <span class="keyword">while</span> <span class="keyword">not</span> <span class="variable">code</span>.<span class="function">werkt</span>():
-        <span class="variable">code</span> = <span class="variable">ai</span>.<span class="function">vraag</span>(<span class="string">"Help alsjeblieft"</span>)
-
-    <span class="keyword">return</span> <span class="variable">code</span>  <span class="comment"># Geen idee hoe het werkt</span>`,
-        uitleg: `<strong>Programmeren in 2026.</strong> Kopieer, plak, "waarom werkt dit niet?", herhaal. Het resultaat werkt, maar niemand weet waarom.`
-    },
-    {
-        filename: "error_handling.rs",
-        code: `<span class="keyword">use</span> std::error::<span class="type">Error</span>;
-
-<span class="comment">// Hoe je errors MOET afhandelen:</span>
-<span class="keyword">fn</span> <span class="function">netjes</span>() -> <span class="type">Result</span><<span class="type">String</span>, Box<<span class="keyword">dyn</span> <span class="type">Error</span>>> <span class="bracket">{</span>
-    <span class="keyword">let</span> <span class="variable">data</span> = <span class="function">lees_bestand</span>(<span class="string">"config.toml"</span>)?;
-    <span class="keyword">let</span> <span class="variable">config</span> = <span class="function">parse</span>(&<span class="variable">data</span>)?;
-    <span class="type">Ok</span>(<span class="variable">config</span>.<span class="variable">naam</span>)
-<span class="bracket">}</span>
-
-<span class="comment">// Hoe je errors ECHT afhandelt:</span>
-<span class="keyword">fn</span> <span class="function">echt</span>() -> <span class="type">String</span> <span class="bracket">{</span>
-    <span class="function">lees_bestand</span>(<span class="string">"config.toml"</span>)
-        .<span class="function">unwrap</span>()  <span class="comment">// gaat vast goed</span>
-        .<span class="function">parse</span>()
-        .<span class="function">unwrap</span>()  <span class="comment">// wat kan er misgaan?</span>
-        .<span class="variable">naam</span>
-        .<span class="function">clone</span>()  <span class="comment">// geen idee waarom maar het werkt</span>
-<span class="bracket">}</span>
-
-<span class="comment">// "Ik fix de error handling later"</span>
-<span class="comment">// - Iedere programmeur, vlak voor productie</span>`,
-        uitleg: `<strong>.unwrap() gang!</strong> We weten allemaal dat we errors netjes moeten afhandelen. We doen het alleen nooit. "Het gaat vast goed" is ons mantra.`
-    },
-    {
-        filename: "standup.kt",
-        code: `<span class="comment">// De dagelijkse standup</span>
-
-<span class="keyword">data class</span> <span class="type">StandupUpdate</span>(
-    <span class="keyword">val</span> <span class="variable">gisteren</span>: <span class="type">String</span>,
-    <span class="keyword">val</span> <span class="variable">vandaag</span>: <span class="type">String</span>,
-    <span class="keyword">val</span> <span class="variable">blocker</span>: <span class="type">String</span>
-)
-
-<span class="keyword">fun</span> <span class="function">standupAntwoord</span>(): <span class="type">StandupUpdate</span> {
-    <span class="keyword">return</span> <span class="type">StandupUpdate</span>(
-        gisteren = <span class="string">"Bezig geweest met... dingen"</span>,
-        vandaag  = <span class="string">"Ga verder met... die dingen"</span>,
-        blocker  = <span class="string">"Geen blockers"</span>
-            <span class="comment">// (behalve motivatie)</span>
-    )
-}
-
-<span class="comment">// Duur standup: 15 minuten</span>
-<span class="comment">// Waarvan nuttig: 2 minuten</span>
-<span class="comment">// Waarvan "kan dit niet async?": 13 minuten</span>`,
-        uitleg: `<strong>De standup-formule.</strong> Gisteren: dingen. Vandaag: meer dingen. Blockers: alleen mijn eigen motivatie. Zelfde antwoord, elke dag.`
-    },
-    {
-        filename: "darkmode.jsx",
-        code: `<span class="keyword">import</span> { <span class="variable">useState</span>, <span class="variable">useEffect</span> } <span class="keyword">from</span> <span class="string">'react'</span>;
-
-<span class="keyword">function</span> <span class="function">DarkModeToggle</span>() {
-  <span class="keyword">const</span> [<span class="variable">dark</span>, <span class="variable">setDark</span>] = <span class="function">useState</span>(<span class="keyword">true</span>);
-  <span class="comment">// ^^^ standaard AAN want we zijn programmeurs</span>
-
-  <span class="function">useEffect</span>(() => {
-    <span class="keyword">if</span> (!<span class="variable">dark</span>) {
-      <span class="variable">alert</span>(<span class="string">"MIJN OGEN! Wie gebruikt er light mode?!"</span>);
-      <span class="function">setDark</span>(<span class="keyword">true</span>); <span class="comment">// nee, terug naar dark</span>
-    }
-  }, [<span class="variable">dark</span>]);
-
-  <span class="keyword">return</span> (
-    <span class="operator">&lt;</span><span class="type">button</span> <span class="variable">onClick</span>={() => <span class="function">setDark</span>(!<span class="variable">dark</span>)}<span class="operator">&gt;</span>
-      {<span class="variable">dark</span> ? <span class="string">'🌙'</span> : <span class="string">'☀️ (waarom?!)'</span>}
-    <span class="operator">&lt;/</span><span class="type">button</span><span class="operator">&gt;</span>
-  );
-}`,
-        uitleg: `<strong>Dark mode is geen keuze, het is een levensstijl.</strong> Light mode? Dan moet je eerst door een alert heen. En dan gaat het vanzelf weer terug naar dark mode.`
-    },
-    {
-        filename: "printer.c",
-        code: `<span class="comment">/* De kantoorprinter: een horrorverhaal in C */</span>
-
-<span class="keyword">#include</span> <span class="string">&lt;stdio.h&gt;</span>
-<span class="keyword">#include</span> <span class="string">&lt;stdbool.h&gt;</span>
-
-<span class="keyword">typedef struct</span> <span class="bracket">{</span>
-    <span class="type">bool</span> <span class="variable">papier</span>;
-    <span class="type">bool</span> <span class="variable">inkt</span>;
-    <span class="type">bool</span> <span class="variable">online</span>;
-    <span class="type">bool</span> <span class="variable">zin_om_te_werken</span>;
-<span class="bracket">}</span> <span class="type">Printer</span>;
-
-<span class="type">int</span> <span class="function">print</span>(<span class="type">Printer</span> *<span class="variable">p</span>) <span class="bracket">{</span>
-    <span class="keyword">if</span> (<span class="variable">p</span>->papier && <span class="variable">p</span>->inkt && <span class="variable">p</span>->online) <span class="bracket">{</span>
-        <span class="comment">// Alle voorwaarden zijn goed?</span>
-        <span class="comment">// Maakt niet uit.</span>
-        <span class="function">printf</span>(<span class="string">"PC LOAD LETTER\\n"</span>);
-        <span class="keyword">return</span> -<span class="number">1</span>;  <span class="comment">// faal toch maar</span>
-    <span class="bracket">}</span>
-    <span class="keyword">return</span> -<span class="number">1</span>;  <span class="comment">// faal sowieso</span>
-<span class="bracket">}</span>`,
-        uitleg: `<strong>De kantoorprinter.</strong> Het maakt niet uit of er papier in zit, of er inkt is, of hij online is — hij gaat toch niet werken. return -1, altijd.`
-    }
-];
-
 let huidigeIndex = -1;
 let gezien = 0;
+let emojiInterval = null;
 
+// --- Shuffle ---
 function shuffleArray(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -719,27 +423,60 @@ function shuffleArray(arr) {
 
 let volgorde = shuffleArray([...Array(snippets.length).keys()]);
 
+// --- Prism language map (filename ext -> prism class) ---
+const langMap = {
+    python: 'python', javascript: 'javascript', typescript: 'typescript',
+    sql: 'sql', bash: 'bash', css: 'css', java: 'java', ruby: 'ruby',
+    go: 'go', yaml: 'yaml', rust: 'rust', kotlin: 'kotlin', jsx: 'jsx',
+    c: 'c'
+};
+
+// --- Toast ---
+function showToast(message, duration = 2000) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// --- Nieuw snippet ---
 function nieuwSnippet() {
     huidigeIndex = (huidigeIndex + 1) % snippets.length;
+
     if (huidigeIndex === 0 && gezien > 0) {
         volgorde = shuffleArray([...Array(snippets.length).keys()]);
+        showToast('\u{1F504} Nieuwe ronde! Alles opnieuw geschud.');
     }
 
     const s = snippets[volgorde[huidigeIndex]];
+
+    // Animate card with rAF instead of void reflow hack
     const card = document.getElementById('codeCard');
     card.classList.remove('fade-in');
-    void card.offsetWidth;
-    card.classList.add('fade-in');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            card.classList.add('fade-in');
+        });
+    });
 
     document.getElementById('filename').textContent = s.filename;
-    document.getElementById('codeBlock').innerHTML = s.code;
+
+    // Prism highlighting
+    const codeEl = document.getElementById('codeContent');
+    const prismLang = langMap[s.lang] || 'plain';
+    codeEl.className = `language-${prismLang}`;
+    codeEl.textContent = s.code;
+    Prism.highlightElement(codeEl);
+
     document.getElementById('explanation').innerHTML = s.uitleg;
 
     gezien++;
+    const teGaan = snippets.length - (huidigeIndex + 1);
     document.getElementById('counter').textContent =
-        `${gezien} snippet${gezien === 1 ? '' : 's'} bekeken — ${snippets.length - (huidigeIndex + 1)} te gaan in deze ronde`;
+        `${gezien} snippet${gezien === 1 ? '' : 's'} bekeken \u{2014} ${teGaan} te gaan in deze ronde`;
 }
 
+// --- Sluit window ---
 function sluitWindow() {
     const card = document.getElementById('codeCard');
     const msg = document.getElementById('closedMessage');
@@ -758,22 +495,71 @@ function sluitWindow() {
     }, 400);
 }
 
-function kopieerCode() {
-    const code = document.getElementById('codeBlock').innerText;
-    navigator.clipboard.writeText(code).then(() => {
-        const btn = document.querySelector('.btn-secondary');
-        const orig = btn.innerHTML;
-        btn.innerHTML = '&#x2705; Gekopieerd!';
-        setTimeout(() => btn.innerHTML = orig, 1500);
+// --- Heropenen ---
+function heropenen() {
+    const card = document.getElementById('codeCard');
+    const msg = document.getElementById('closedMessage');
+    const btnRow = document.getElementById('btnRow');
+    const counter = document.getElementById('counter');
+
+    msg.style.display = 'none';
+    card.style.display = '';
+    card.style.transform = '';
+    card.style.opacity = '';
+    btnRow.style.display = '';
+    counter.style.display = '';
+
+    card.classList.remove('fade-in');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            card.classList.add('fade-in');
+        });
     });
+
+    showToast('\u{1F4BB} Toch weer aan het werk...');
 }
 
-// Emoji regen
+// --- Kopieer met fallback ---
+function kopieerCode() {
+    const code = document.getElementById('codeContent').textContent;
+    const btn = document.querySelector('.btn-secondary');
+    const orig = btn.innerHTML;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+            btn.innerHTML = '\u{2705} Gekopieerd!';
+            setTimeout(() => btn.innerHTML = orig, 1500);
+        }).catch(() => {
+            fallbackCopy(code, btn, orig);
+        });
+    } else {
+        fallbackCopy(code, btn, orig);
+    }
+}
+
+function fallbackCopy(text, btn, orig) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        btn.innerHTML = '\u{2705} Gekopieerd!';
+    } catch {
+        btn.innerHTML = '\u{274C} Kopiëren mislukt';
+    }
+    document.body.removeChild(ta);
+    setTimeout(() => btn.innerHTML = orig, 1500);
+}
+
+// --- Emoji rain with visibility pause ---
 function startEmojiRain() {
-    const emojis = ['💻', '🐛', '☕', '🔥', '😅', '🚀', '⌨️', '🎉', '💾', '🤖'];
+    const emojis = ['\u{1F4BB}', '\u{1F41B}', '\u{2615}', '\u{1F525}', '\u{1F605}', '\u{1F680}', '\u{2328}\u{FE0F}', '\u{1F389}', '\u{1F4BE}', '\u{1F916}'];
     const container = document.getElementById('emojiRain');
 
-    setInterval(() => {
+    function spawnDrop() {
         const drop = document.createElement('div');
         drop.className = 'emoji-drop';
         drop.textContent = emojis[Math.floor(Math.random() * emojis.length)];
@@ -781,10 +567,42 @@ function startEmojiRain() {
         drop.style.animationDuration = (5 + Math.random() * 8) + 's';
         container.appendChild(drop);
         setTimeout(() => drop.remove(), 13000);
-    }, 800);
+    }
+
+    function startRain() {
+        if (!emojiInterval) {
+            emojiInterval = setInterval(spawnDrop, 800);
+        }
+    }
+
+    function stopRain() {
+        if (emojiInterval) {
+            clearInterval(emojiInterval);
+            emojiInterval = null;
+        }
+    }
+
+    // Pause when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopRain();
+        } else {
+            startRain();
+        }
+    });
+
+    startRain();
 }
 
-// Start!
+// --- Keyboard support for reopen link ---
+document.addEventListener('keydown', (e) => {
+    if (e.target.classList.contains('reopen-link') && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        heropenen();
+    }
+});
+
+// --- Start! ---
 nieuwSnippet();
 startEmojiRain();
 </script>
